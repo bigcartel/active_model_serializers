@@ -42,15 +42,20 @@ module ActiveModel
 
       def test_has_many
         assert_equal(
-          { posts: { type: :has_many, options: { embed: :ids } },
+          { posts: { type: :has_many, options: {
+              embed: :ids, serializer: SpecialPostSerializer }
+            },
             roles: { type: :has_many, options: { embed: :ids } },
             bio: { type: :belongs_to, options: {} } },
           @author_serializer.class._associations
         )
         @author_serializer.each_association do |name, serializer, options|
           if name == :posts
-            assert_equal({embed: :ids}, options)
+            assert_equal({embed: :ids, serializer: SpecialPostSerializer}, options)
             assert_kind_of(ActiveModel::Serializer.config.array_serializer, serializer)
+
+            serializers = serializer.to_a
+            assert_kind_of SpecialPostSerializer, serializers.first
           elsif name == :bio
             assert_equal({}, options)
             assert_nil serializer
